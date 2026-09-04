@@ -73,17 +73,20 @@ export default function Navbar() {
         <nav className="flex items-center gap-2 sm:gap-4">
           {!loading && user && (
             <>
-              <Link
-                href="/dashboard"
-                className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-all ${
-                  pathname === "/dashboard"
-                    ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white"
-                    : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-900"
-                }`}
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                <span>My Tasks</span>
-              </Link>
+              {/* Only show My Tasks for non-admin users */}
+              {user.role !== "admin" && (
+                <Link
+                  href="/dashboard"
+                  className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-all ${
+                    pathname === "/dashboard"
+                      ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white"
+                      : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-900"
+                  }`}
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>My Tasks</span>
+                </Link>
+              )}
 
               {user.role === "admin" && (
                 <Link
@@ -143,7 +146,7 @@ export default function Navbar() {
               {pathname !== "/login" && (
                 <Link
                   href="/login"
-                  className="rounded-lg px-3.5 py-1.5 text-sm font-medium text-zinc-700 transition hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
+                  className="rounded-xl border border-zinc-200 px-3.5 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
                 >
                   Sign In
                 </Link>
@@ -151,7 +154,7 @@ export default function Navbar() {
               {pathname !== "/register" && (
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-900 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-500/25 transition hover:bg-indigo-500"
                 >
                   <span>Sign Up</span>
                 </Link>

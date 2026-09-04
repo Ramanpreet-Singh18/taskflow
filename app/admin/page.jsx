@@ -36,6 +36,10 @@ export default function AdminPage() {
   const [userToDelete, setUserToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Confirmation modal for toggle status
+  const [userToToggle, setUserToToggle] = useState(null);
+  const [toggling, setToggling] = useState(false);
+
   function showMessage(text, type = "success") {
     setMessage({ text, type });
     setTimeout(() => setMessage(null), 5000);
@@ -74,23 +78,31 @@ export default function AdminPage() {
     return () => clearTimeout(timer);
   }, [fetchUsers]);
 
-  // Toggle user active status
-  async function handleToggleStatus(user) {
-    const targetAction = user.isActive ? "deactivate" : "activate";
-    setActionLoading(user.id);
+  // Confirm toggle: opens confirmation modal
+  function handleToggleStatus(user) {
+    setUserToToggle(user);
+  }
+
+  // Actually performs the toggle after confirmation
+  async function confirmToggleStatus() {
+    if (!userToToggle) return;
+    const targetAction = userToToggle.isActive ? "deactivate" : "activate";
+    setToggling(true);
+    setActionLoading(userToToggle.id);
 
     try {
-      const res = await fetch(`/api/admin/users/${user.id}/status`, {
+      const res = await fetch(`/api/admin/users/${userToToggle.id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isActive: !user.isActive }),
+        body: JSON.stringify({ isActive: !userToToggle.isActive }),
       });
 
       const data = await res.json();
       if (res.ok) {
         showMessage(
-          `User "${user.name}" has been ${targetAction}d successfully.`
+          `User "${userToToggle.name}" has been ${targetAction}d successfully.`
         );
+        setUserToToggle(null);
         fetchUsers();
       } else {
         showMessage(data.message || `Failed to ${targetAction} user`, "error");
@@ -98,6 +110,7 @@ export default function AdminPage() {
     } catch (err) {
       showMessage(`Error attempting to ${targetAction} user`, "error");
     } finally {
+      setToggling(false);
       setActionLoading(null);
     }
   }
@@ -390,6 +403,73 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal for Toggle Status */}
+      {userToToggle && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl border bg-white p-6 shadow-2xl dark:bg-zinc-900 sm:p-7
+            border-amber-200 dark:border-amber-900">
+            <div className={`flex h-12 w-12 items-center justify-center rounded-full ${
+              userToToggle.isActive
+                ? "bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400"
+                : "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400"
+            }`}>
+              <Power className="h-6 w-6" />
+            </div>
+
+            <h3 className="mt-4 text-lg font-bold text-zinc-900 dark:text-white">
+              {userToToggle.isActive ? "Deactivate" : "Activate"} User Account?
+            </h3>
+
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+              Are you sure you want to{" "}
+              <strong>{userToToggle.isActive ? "deactivate" : "activate"}</strong>{" "}
+              the account for <strong>{userToToggle.name}</strong> ({userToToggle.email})?
+            </p>
+
+            <div className={`mt-3 rounded-lg p-3 text-xs ${
+              userToToggle.isActive
+                ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+            }`}>
+              {userToToggle.isActive
+                ? "⚠️ The user will immediately lose access to their dashboard and tasks."
+                : "✅ The user will regain full access to their dashboard and tasks."}
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setUserToToggle(null)}
+                disabled={toggling}
+                className="rounded-xl border border-zinc-300 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={confirmToggleStatus}
+                disabled={toggling}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow disabled:opacity-50 ${
+                  userToToggle.isActive
+                    ? "bg-amber-500 hover:bg-amber-400"
+                    : "bg-emerald-600 hover:bg-emerald-500"
+                }`}
+              >
+                <Power className="h-3.5 w-3.5" />
+                <span>
+                  {toggling
+                    ? "Updating..."
+                    : userToToggle.isActive
+                    ? "Confirm Deactivate"
+                    : "Confirm Activate"}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Confirmation Modal for Delete User */}
       {userToDelete && (

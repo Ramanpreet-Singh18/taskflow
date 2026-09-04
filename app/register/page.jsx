@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User, Mail, Lock, ArrowRight, AlertCircle, Sparkles, CheckSquare } from "lucide-react";
+import { User, Mail, Lock, ArrowRight, AlertCircle, Sparkles, CheckSquare, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,6 +16,7 @@ export default function RegisterPage() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleChange(e) {
     setFormData({
@@ -123,18 +124,32 @@ export default function RegisterPage() {
               <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
                 Password (minimum 6 characters)
               </label>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute left-3.5 top-3 h-4 w-4 text-zinc-400" />
+              {/* Flex wrapper: gives the field its border/bg, button is a real sibling */}
+              <div className="flex items-center overflow-hidden rounded-xl border border-zinc-300 bg-zinc-50/50 transition focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 dark:border-zinc-700 dark:bg-zinc-800/80 dark:focus-within:border-indigo-400">
+                <Lock className="ml-3.5 h-4 w-4 shrink-0 text-zinc-400 pointer-events-none" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   required
                   minLength={6}
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-zinc-300 bg-zinc-50/50 pl-10 pr-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700 dark:bg-zinc-800/80 dark:text-white dark:placeholder-zinc-500 dark:focus:bg-zinc-800 dark:focus:border-indigo-400"
+                  className="pw-input flex-1 bg-transparent px-2.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none dark:text-white dark:placeholder-zinc-500"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="px-3 py-2.5 shrink-0 text-zinc-400 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
               </div>
             </div>
 
